@@ -19,6 +19,7 @@ func FormatTime(seconds int) string {
 	formattedTime := ""
 
 	hours := int(seconds / secondsInHour)
+	println(hours)
 	if hours != 0 {
 		formattedTime += addLeadingZero(hours) + ":"
 		seconds = seconds % secondsInHour
@@ -36,7 +37,7 @@ func FormatTime(seconds int) string {
 func addLeadingZero(number int) string {
 	strNumber := strconv.Itoa(number)
 
-	if number > 10 {
+	if number >= 10 {
 		return strNumber
 	}
 
