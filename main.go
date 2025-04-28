@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -64,26 +63,18 @@ func formatTime(seconds int) string {
 	return formattedTime
 }
 
-func getCurrentSongInfo(video ytVideo, player ytPlayer) string {
+func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 	videoUrl := ytVideoUrl + video.Id
 	timestamp := formatTime(int(player.VideoProgress))
 
 	return fmt.Sprintf("%s %s таймстемп: %s", video.Title, videoUrl, timestamp)
 }
 
-func main() {
-	authToken := flag.String("token", "", "YT Desktop API token")
-	flag.Parse()
-
-	if *authToken == "" {
-		fmt.Println("Не могу получить информацию о текущей песне без токена авторизации")
-		return
-	}
-
+func getCurrentSongInfo(authToken string) string {
 	req, err := http.NewRequest("GET", ytDesktopGetStateUrl, nil)
 	checkError(err)
 
-	req.Header.Set(authHeader, *authToken)
+	req.Header.Set(authHeader, authToken)
 
 	client := &http.Client{}
 	res, err := client.Do(req)
@@ -96,9 +87,26 @@ func main() {
 	json.Unmarshal(resBody, &resJson)
 
 	if resJson.Error != "" {
-		fmt.Println(resJson.Error)
+		return resJson.Error
+	}
+
+	return formatCurrentSongInfo(resJson.Video, resJson.Player)
+}
+
+func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
+	tokenQuery := req.URL.Query()["token"]
+
+	if len(tokenQuery) == 0 {
+		w.Write([]byte("Не могу получить информацию о текущей песне без токена авторизации"))
 		return
 	}
 
-	fmt.Println(getCurrentSongInfo(resJson.Video, resJson.Player))
+	currentSongInfo := getCurrentSongInfo(tokenQuery[0])
+	w.Write([]byte(currentSongInfo))
+}
+
+func main() {
+	http.HandleFunc("/", getCurrentSongInfoRoute)
+
+	http.ListenAndServe(":8050", nil)
 }
