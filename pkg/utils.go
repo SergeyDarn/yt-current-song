@@ -1,6 +1,8 @@
 package pkg
 
-import "fmt"
+import (
+	"strconv"
+)
 
 var (
 	secondsInHour   = 3600
@@ -18,19 +20,25 @@ func FormatTime(seconds int) string {
 
 	hours := int(seconds / secondsInHour)
 	if hours != 0 {
-		formattedTime += fmt.Sprintf("%d:", hours)
+		formattedTime += addLeadingZero(hours) + ":"
 		seconds = seconds % secondsInHour
 	}
 
 	minutes := int(seconds / secondsInMinute)
-	if minutes != 0 {
-		formattedTime += fmt.Sprintf("%d:", minutes)
-		seconds = seconds % secondsInMinute
-	}
+	formattedTime += addLeadingZero(minutes) + ":"
+	seconds = seconds % secondsInMinute
 
-	if seconds != 0 {
-		formattedTime += fmt.Sprintf("%d", seconds)
-	}
+	formattedTime += addLeadingZero(seconds)
 
 	return formattedTime
+}
+
+func addLeadingZero(number int) string {
+	strNumber := strconv.Itoa(number)
+
+	if number > 10 {
+		return strNumber
+	}
+
+	return "0" + strNumber
 }
