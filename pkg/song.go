@@ -14,7 +14,9 @@ var (
 	ytDesktopApiUrl      = "http://localhost:9863/api/v1/"
 	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
-	ytVideoUrl = "https://www.youtube.com/watch?v="
+	ytVideoUrl     = "https://www.youtube.com/watch?v="
+	ytStatePaused  = 0
+	ytStatePlaying = 1
 )
 
 type ytState struct {
@@ -31,6 +33,7 @@ type ytVideo struct {
 
 type ytPlayer struct {
 	VideoProgress float32
+	TrackState    int
 }
 
 func GetCurrentSongInfo(authToken string) string {
@@ -57,6 +60,10 @@ func GetCurrentSongInfo(authToken string) string {
 }
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
+	if player.TrackState == ytStatePaused {
+		return "No song is currently playing"
+	}
+
 	videoUrl := ytVideoUrl + video.Id
 	timestamp := FormatTime(int(player.VideoProgress))
 
