@@ -6,8 +6,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
 var (
@@ -22,13 +20,6 @@ var (
 	ytStatePaused             = 0
 	ytStatePlaying            = 1
 	songCollectionMinuteStart = 15
-)
-
-var (
-	PAUSE_COLOR  = lipgloss.Color("192")
-	SONG_COLOR   = lipgloss.Color("#f98b6c")
-	ARTIST_COLOR = lipgloss.Color("#ef4fa6")
-	URL_COLOR    = lipgloss.Color("#1e88e5")
 )
 
 type ytState struct {
@@ -75,7 +66,7 @@ func GetCurrentSongInfo(authToken string) string {
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 	if player.TrackState == ytStatePaused {
-		return PrepareColorOutput("No song is currently playing", PAUSE_COLOR)
+		return "No song is currently playing"
 	}
 
 	videoUrl := ytVideoUrl + video.Id
@@ -83,12 +74,7 @@ func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 		videoUrl += ytVideoTimeQuery + strconv.Itoa(int(player.VideoProgress))
 	}
 
-	return fmt.Sprintf(
-		"%s %s %s",
-		PrepareColorOutput(video.Author, ARTIST_COLOR),
-		PrepareColorOutput(video.Title, SONG_COLOR),
-		PrepareColorOutput(videoUrl, URL_COLOR),
-	)
+	return fmt.Sprintf("%s %s %s", video.Author, video.Title, videoUrl)
 }
 
 func isSongCollection(durationSeconds int) bool {

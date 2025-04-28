@@ -2,8 +2,6 @@ package pkg
 
 import (
 	"strconv"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
 var (
@@ -51,8 +49,4 @@ func addLeadingZero(number int) string {
 	}
 
 	return "0" + strNumber
-}
-
-func PrepareColorOutput(output string, color lipgloss.Color) string {
-	return lipgloss.NewStyle().Foreground(lipgloss.TerminalColor(color)).Render(output)
 }
