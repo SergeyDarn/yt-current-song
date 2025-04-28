@@ -39,7 +39,7 @@ function getCurrentSongInfo(video, player) {
 }
 
 function showResult(text) {
-    document.querySelector("html").innerHTML = text
+    document.body.innerHTML = text
 }
 
 
