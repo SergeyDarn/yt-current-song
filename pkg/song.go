@@ -74,7 +74,7 @@ func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 		videoUrl += ytVideoTimeQuery + strconv.Itoa(int(player.VideoProgress))
 	}
 
-	return fmt.Sprintf("%s %s %s", video.Author, video.Title, videoUrl)
+	return fmt.Sprintf("%s: %s %s", video.Author, video.Title, videoUrl)
 }
 
 func isSongCollection(durationSeconds int) bool {
