@@ -18,18 +18,18 @@ func FormatTime(seconds int) string {
 
 	hours := int(seconds / secondsInHour)
 	if hours != 0 {
-		formattedTime += fmt.Sprintf("%dч ", hours)
+		formattedTime += fmt.Sprintf("%d:", hours)
 		seconds = seconds % secondsInHour
 	}
 
 	minutes := int(seconds / secondsInMinute)
 	if minutes != 0 {
-		formattedTime += fmt.Sprintf("%dм ", minutes)
+		formattedTime += fmt.Sprintf("%d:", minutes)
 		seconds = seconds % secondsInMinute
 	}
 
 	if seconds != 0 {
-		formattedTime += fmt.Sprintf("%dс", seconds)
+		formattedTime += fmt.Sprintf("%d", seconds)
 	}
 
 	return formattedTime

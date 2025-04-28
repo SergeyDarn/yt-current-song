@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	NoAuthTokenError = "Не могу получить информацию о текущей песне без токена авторизации"
+	NoAuthTokenError = "Cannot access current song info without YT Desktop api token"
 	authHeader       = "authorization"
 
 	ytDesktopApiUrl      = "http://localhost:9863/api/v1/"
@@ -60,5 +60,5 @@ func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 	videoUrl := ytVideoUrl + video.Id
 	timestamp := FormatTime(int(player.VideoProgress))
 
-	return fmt.Sprintf("%s %s таймстемп: %s", video.Title, videoUrl, timestamp)
+	return fmt.Sprintf("%s %s timestamp: %s", video.Title, videoUrl, timestamp)
 }

@@ -13,7 +13,7 @@ func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	if len(tokenQuery) == 0 {
-		w.Write([]byte("Не могу получить информацию о текущей песне без токена авторизации"))
+		w.Write([]byte(pkg.NoAuthTokenError))
 		return
 	}
 
