@@ -96,7 +96,7 @@ func getCurrentSongInfo(authToken string) string {
 func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
 	tokenQuery := req.URL.Query()["token"]
 
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
 	if len(tokenQuery) == 0 {
 		w.Write([]byte("Не могу получить информацию о текущей песне без токена авторизации"))
