@@ -2,6 +2,8 @@ package pkg
 
 import (
 	"strconv"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 var (
@@ -18,19 +20,27 @@ func CheckError(err error) {
 func FormatTime(seconds int) string {
 	formattedTime := ""
 
-	hours := int(seconds / secondsInHour)
+	hours := SecondsToHours(seconds)
 	if hours != 0 {
 		formattedTime += addLeadingZero(hours) + ":"
 		seconds = seconds % secondsInHour
 	}
 
-	minutes := int(seconds / secondsInMinute)
+	minutes := SecondsToMinutes(seconds)
 	formattedTime += addLeadingZero(minutes) + ":"
 	seconds = seconds % secondsInMinute
 
 	formattedTime += addLeadingZero(seconds)
 
 	return formattedTime
+}
+
+func SecondsToHours(seconds int) int {
+	return int(seconds / secondsInHour)
+}
+
+func SecondsToMinutes(seconds int) int {
+	return int(seconds / secondsInMinute)
 }
 
 func addLeadingZero(number int) string {
@@ -41,4 +51,8 @@ func addLeadingZero(number int) string {
 	}
 
 	return "0" + strNumber
+}
+
+func PrepareColorOutput(output string, color lipgloss.Color) string {
+	return lipgloss.NewStyle().Foreground(lipgloss.TerminalColor(color)).Render(output)
 }

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 var (
@@ -14,9 +17,18 @@ var (
 	ytDesktopApiUrl      = "http://localhost:9863/api/v1/"
 	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
-	ytVideoUrl     = "https://www.youtube.com/watch?v="
-	ytStatePaused  = 0
-	ytStatePlaying = 1
+	ytVideoUrl                = "https://www.youtube.com/watch?v="
+	ytVideoTimeQuery          = "&t="
+	ytStatePaused             = 0
+	ytStatePlaying            = 1
+	songCollectionMinuteStart = 15
+)
+
+var (
+	PAUSE_COLOR  = lipgloss.Color("192")
+	SONG_COLOR   = lipgloss.Color("#f98b6c")
+	ARTIST_COLOR = lipgloss.Color("#ef4fa6")
+	URL_COLOR    = lipgloss.Color("#1e88e5")
 )
 
 type ytState struct {
@@ -27,8 +39,10 @@ type ytState struct {
 }
 
 type ytVideo struct {
-	Title string
-	Id    string
+	Author          string
+	Title           string
+	Id              string
+	DurationSeconds int
 }
 
 type ytPlayer struct {
@@ -61,11 +75,24 @@ func GetCurrentSongInfo(authToken string) string {
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 	if player.TrackState == ytStatePaused {
-		return "No song is currently playing"
+		return PrepareColorOutput("No song is currently playing", PAUSE_COLOR)
 	}
 
 	videoUrl := ytVideoUrl + video.Id
-	timestamp := FormatTime(int(player.VideoProgress))
+	if isSongCollection(video.DurationSeconds) {
+		videoUrl += ytVideoTimeQuery + strconv.Itoa(int(player.VideoProgress))
+	}
 
-	return fmt.Sprintf("%s %s timestamp: %s", video.Title, videoUrl, timestamp)
+	return fmt.Sprintf(
+		"%s %s %s",
+		PrepareColorOutput(video.Author, ARTIST_COLOR),
+		PrepareColorOutput(video.Title, SONG_COLOR),
+		PrepareColorOutput(videoUrl, URL_COLOR),
+	)
+}
+
+func isSongCollection(durationSeconds int) bool {
+	durationMinutes := SecondsToMinutes(durationSeconds)
+
+	return durationMinutes >= songCollectionMinuteStart
 }
