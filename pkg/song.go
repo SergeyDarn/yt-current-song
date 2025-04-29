@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var (
+const (
 	NoAuthTokenError = "Cannot access current song info without YT Desktop api token"
 	authHeader       = "authorization"
 
@@ -54,14 +54,14 @@ func GetCurrentSongInfo(authToken string) string {
 	resBody, err := io.ReadAll(res.Body)
 	CheckError(err)
 
-	var resJson ytState
-	json.Unmarshal(resBody, &resJson)
+	var songStateJson ytState
+	json.Unmarshal(resBody, &songStateJson)
 
-	if resJson.Error != "" {
-		return resJson.Error
+	if songStateJson.Error != "" {
+		return songStateJson.Error
 	}
 
-	return formatCurrentSongInfo(resJson.Video, resJson.Player)
+	return formatCurrentSongInfo(songStateJson.Video, songStateJson.Player)
 }
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {

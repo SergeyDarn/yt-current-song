@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-var (
+const (
 	secondsInHour   = 3600
 	secondsInMinute = 60
 )
