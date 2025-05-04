@@ -99,12 +99,12 @@ func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 }
 
 func getPlaylistUrl(videoState ytVideoState) string {
-	if videoState.PlaylistId == "" {
-		return "No playlist available"
-	}
-
 	if videoState.Player.TrackState == ytStatePaused {
 		return "No song is currently playing"
+	}
+
+	if videoState.PlaylistId == "" {
+		return "No playlist available"
 	}
 
 	return ytPlaylistUrl + videoState.PlaylistId
