@@ -17,8 +17,8 @@ const (
 	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
 	ytVideoUrl                = "https://www.youtube.com/watch?v="
-	ytVideoTimeQuery          = "&t="
-	ytPlaylistUrl             = "https://www.youtube.com/playlist?list="
+	ytTimeParam               = "t="
+	ytPlaylistParam           = "list="
 	ytStatePaused             = 0
 	ytStatePlaying            = 1
 	songCollectionMinuteStart = 15
@@ -50,16 +50,7 @@ func GetCurrentSongInfo(authToken string) string {
 		return err.Error()
 	}
 
-	return formatCurrentSongInfo(songState.Video, songState.Player)
-}
-
-func GetCurrentPlaylistUrl(authToken string) string {
-	songState, err := getYtVideoState(authToken)
-	if err != nil {
-		return err.Error()
-	}
-
-	return getPlaylistUrl(songState)
+	return formatCurrentSongInfo(songState)
 }
 
 func getYtVideoState(authToken string) (ytVideoState, error) {
@@ -85,29 +76,21 @@ func getYtVideoState(authToken string) (ytVideoState, error) {
 	return videoState, nil
 }
 
-func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
-	if player.TrackState == ytStatePaused {
+func formatCurrentSongInfo(state ytVideoState) string {
+	if state.Player.TrackState == ytStatePaused {
 		return "No song is currently playing"
 	}
 
-	videoUrl := ytVideoUrl + video.Id
-	if isSongCollection(video.DurationSeconds) {
-		videoUrl += ytVideoTimeQuery + strconv.Itoa(int(player.VideoProgress))
+	videoUrl := ytVideoUrl + state.Video.Id
+	if isSongCollection(state.Video.DurationSeconds) {
+		videoUrl += "&" + ytTimeParam + strconv.Itoa(int(state.Player.VideoProgress))
 	}
 
-	return fmt.Sprintf("%s: %s %s", video.Author, video.Title, videoUrl)
-}
-
-func getPlaylistUrl(videoState ytVideoState) string {
-	if videoState.Player.TrackState == ytStatePaused {
-		return "No song is currently playing"
+	if state.PlaylistId != "" {
+		videoUrl += "&" + ytPlaylistParam + state.PlaylistId
 	}
 
-	if videoState.PlaylistId == "" {
-		return "No playlist available"
-	}
-
-	return ytPlaylistUrl + videoState.PlaylistId
+	return fmt.Sprintf("%s: %s %s", state.Video.Author, state.Video.Title, videoUrl)
 }
 
 func isSongCollection(durationSeconds int) bool {
