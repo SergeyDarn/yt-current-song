@@ -45,21 +45,21 @@ type ytPlayer struct {
 }
 
 func GetCurrentSongInfo(authToken string) string {
-	songStateJson, err := getYtVideoState(authToken)
+	songState, err := getYtVideoState(authToken)
 	if err != nil {
 		return err.Error()
 	}
 
-	return formatCurrentSongInfo(songStateJson.Video, songStateJson.Player)
+	return formatCurrentSongInfo(songState.Video, songState.Player)
 }
 
 func GetCurrentPlaylistUrl(authToken string) string {
-	songStateJson, err := getYtVideoState(authToken)
+	songState, err := getYtVideoState(authToken)
 	if err != nil {
 		return err.Error()
 	}
 
-	return getPlaylistUrl(songStateJson)
+	return getPlaylistUrl(songState)
 }
 
 func getYtVideoState(authToken string) (ytVideoState, error) {
@@ -75,14 +75,14 @@ func getYtVideoState(authToken string) (ytVideoState, error) {
 	resBody, err := io.ReadAll(res.Body)
 	CheckError(err)
 
-	var songStateJson ytVideoState
-	json.Unmarshal(resBody, &songStateJson)
+	var videoState ytVideoState
+	json.Unmarshal(resBody, &videoState)
 
-	if songStateJson.Error != "" {
-		return songStateJson, errors.New(songStateJson.Error)
+	if videoState.Error != "" {
+		return videoState, errors.New(videoState.Error)
 	}
 
-	return songStateJson, nil
+	return videoState, nil
 }
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
