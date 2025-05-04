@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,14 +18,16 @@ const (
 
 	ytVideoUrl                = "https://www.youtube.com/watch?v="
 	ytVideoTimeQuery          = "&t="
+	ytPlaylistUrl             = "https://www.youtube.com/playlist?list="
 	ytStatePaused             = 0
 	ytStatePlaying            = 1
 	songCollectionMinuteStart = 15
 )
 
-type ytState struct {
-	Video  ytVideo
-	Player ytPlayer
+type ytVideoState struct {
+	Video      ytVideo
+	Player     ytPlayer
+	PlaylistId string
 
 	Error string
 }
@@ -42,6 +45,24 @@ type ytPlayer struct {
 }
 
 func GetCurrentSongInfo(authToken string) string {
+	songStateJson, err := getYtVideoState(authToken)
+	if err != nil {
+		return err.Error()
+	}
+
+	return formatCurrentSongInfo(songStateJson.Video, songStateJson.Player)
+}
+
+func GetCurrentPlaylistUrl(authToken string) string {
+	songStateJson, err := getYtVideoState(authToken)
+	if err != nil {
+		return err.Error()
+	}
+
+	return getPlaylistUrl(songStateJson)
+}
+
+func getYtVideoState(authToken string) (ytVideoState, error) {
 	req, err := http.NewRequest("GET", ytDesktopGetStateUrl, nil)
 	CheckError(err)
 
@@ -54,14 +75,14 @@ func GetCurrentSongInfo(authToken string) string {
 	resBody, err := io.ReadAll(res.Body)
 	CheckError(err)
 
-	var songStateJson ytState
+	var songStateJson ytVideoState
 	json.Unmarshal(resBody, &songStateJson)
 
 	if songStateJson.Error != "" {
-		return songStateJson.Error
+		return songStateJson, errors.New(songStateJson.Error)
 	}
 
-	return formatCurrentSongInfo(songStateJson.Video, songStateJson.Player)
+	return songStateJson, nil
 }
 
 func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
@@ -75,6 +96,18 @@ func formatCurrentSongInfo(video ytVideo, player ytPlayer) string {
 	}
 
 	return fmt.Sprintf("%s: %s %s", video.Author, video.Title, videoUrl)
+}
+
+func getPlaylistUrl(videoState ytVideoState) string {
+	if videoState.PlaylistId == "" {
+		return "No playlist available"
+	}
+
+	if videoState.Player.TrackState == ytStatePaused {
+		return "No song is currently playing"
+	}
+
+	return ytPlaylistUrl + videoState.PlaylistId
 }
 
 func isSongCollection(durationSeconds int) bool {

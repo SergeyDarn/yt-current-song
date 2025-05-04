@@ -8,6 +8,11 @@ import (
 )
 
 func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "GET" {
+		http.NotFound(w, req)
+		return
+	}
+
 	tokenQuery := req.URL.Query()["token"]
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
