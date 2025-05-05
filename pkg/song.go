@@ -17,8 +17,8 @@ const (
 	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
 	ytVideoUrl                = "https://www.youtube.com/watch?v="
-	ytTimeParam               = "t="
-	ytPlaylistParam           = "list="
+	ytTimeParam               = "&t="
+	ytPlaylistParam           = "&list="
 	ytStatePaused             = 0
 	ytStatePlaying            = 1
 	songCollectionMinuteStart = 15
@@ -83,11 +83,11 @@ func formatCurrentSongInfo(state ytVideoState) string {
 
 	videoUrl := ytVideoUrl + state.Video.Id
 	if isSongCollection(state.Video.DurationSeconds) {
-		videoUrl += "&" + ytTimeParam + strconv.Itoa(int(state.Player.VideoProgress))
+		videoUrl += ytTimeParam + strconv.Itoa(int(state.Player.VideoProgress))
 	}
 
 	if state.PlaylistId != "" {
-		videoUrl += "&" + ytPlaylistParam + state.PlaylistId
+		videoUrl += ytPlaylistParam + state.PlaylistId
 	}
 
 	return fmt.Sprintf("%s: %s %s", state.Video.Author, state.Video.Title, videoUrl)
