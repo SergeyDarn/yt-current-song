@@ -4,25 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/yt-current-song/pkg"
+	yt "github.com/yt-current-song/pkg"
 )
 
 func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
-	if req.Method != "GET" {
+	if req.Method != http.MethodGet {
 		http.NotFound(w, req)
 		return
 	}
 
 	tokenQuery := req.URL.Query()["token"]
-
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-
 	if len(tokenQuery) == 0 {
-		w.Write([]byte(pkg.NoAuthTokenError))
+		w.Write([]byte(yt.NoAuthTokenError))
 		return
 	}
 
-	currentSongInfo := pkg.GetCurrentSongInfo(tokenQuery[0])
+	currentSongInfo := yt.GetCurrentSongInfo(tokenQuery[0])
 	w.Write([]byte(currentSongInfo))
 }
 

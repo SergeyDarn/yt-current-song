@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/yt-current-song/pkg"
+	yt "github.com/yt-current-song/pkg"
 )
 
 func main() {
@@ -12,9 +12,9 @@ func main() {
 	flag.Parse()
 
 	if *authToken == "" {
-		fmt.Println(pkg.NoAuthTokenError)
+		fmt.Println(yt.NoAuthTokenError)
 		return
 	}
 
-	fmt.Println(pkg.GetCurrentSongInfo(*authToken))
+	fmt.Println(yt.GetCurrentSongInfo(*authToken))
 }
