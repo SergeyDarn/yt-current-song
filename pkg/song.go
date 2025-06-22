@@ -7,13 +7,14 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
 	NoAuthTokenError = "Cannot access current song info without YT Desktop api token"
 	authHeader       = "authorization"
 
-	ytDesktopApiUrl      = "http://localhost:9863/api/v1/"
+	ytDesktopApiUrl      = "http://{ip}:9863/api/v1/"
 	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
 	ytVideoUrl                = "https://www.youtube.com/watch?v="
@@ -44,17 +45,56 @@ type ytPlayer struct {
 	TrackState    int
 }
 
-func GetCurrentSongInfo(authToken string) string {
-	songState, err := getYtVideoState(authToken)
+func (s ytVideoState) getFormattedSongInfo() string {
+	if s.Player.TrackState == ytStatePaused {
+		return "No song is currently playing"
+	}
+
+	return fmt.Sprintf(
+		"%s: %s %s",
+		s.Video.Author,
+		s.Video.Title,
+		s.getVideoUrl(),
+	)
+}
+
+func (s ytVideoState) getVideoUrl() string {
+	videoUrl := ytVideoUrl + s.Video.Id
+
+	s.addVideoTime(&videoUrl)
+	s.addVideoPlaylist(&videoUrl)
+
+	return videoUrl
+}
+
+func (s ytVideoState) addVideoTime(videoUrl *string) {
+	videoDurationMinutes := SecondsToMinutes(s.Video.DurationSeconds)
+	isSongCollection := videoDurationMinutes >= songCollectionMinuteStart
+
+	if isSongCollection {
+		videoTime := int(s.Player.VideoProgress)
+		*videoUrl += ytTimeParam + strconv.Itoa(videoTime)
+	}
+}
+
+func (s ytVideoState) addVideoPlaylist(videoUrl *string) {
+	if s.PlaylistId != "" {
+		*videoUrl += ytPlaylistParam + s.PlaylistId
+	}
+}
+
+func GetCurrentSongInfo(authToken string, appIp string) string {
+	songState, err := getYtVideoState(authToken, appIp)
 	if err != nil {
 		return err.Error()
 	}
 
-	return formatCurrentSongInfo(songState)
+	return songState.getFormattedSongInfo()
 }
 
-func getYtVideoState(authToken string) (ytVideoState, error) {
-	req, err := http.NewRequest("GET", ytDesktopGetStateUrl, nil)
+func getYtVideoState(authToken string, appIp string) (ytVideoState, error) {
+	url := strings.Replace(ytDesktopGetStateUrl, "{ip}", appIp, 1)
+	req, err := http.NewRequest("GET", url, nil)
 	CheckError(err)
 
 	req.Header.Set(authHeader, authToken)
@@ -74,27 +114,4 @@ func getYtVideoState(authToken string) (ytVideoState, error) {
 	}
 
 	return videoState, nil
-}
-
-func formatCurrentSongInfo(state ytVideoState) string {
-	if state.Player.TrackState == ytStatePaused {
-		return "No song is currently playing"
-	}
-
-	videoUrl := ytVideoUrl + state.Video.Id
-	if isSongCollection(state.Video.DurationSeconds) {
-		videoUrl += ytTimeParam + strconv.Itoa(int(state.Player.VideoProgress))
-	}
-
-	if state.PlaylistId != "" {
-		videoUrl += ytPlaylistParam + state.PlaylistId
-	}
-
-	return fmt.Sprintf("%s: %s %s", state.Video.Author, state.Video.Title, videoUrl)
-}
-
-func isSongCollection(durationSeconds int) bool {
-	durationMinutes := SecondsToMinutes(durationSeconds)
-
-	return durationMinutes >= songCollectionMinuteStart
 }

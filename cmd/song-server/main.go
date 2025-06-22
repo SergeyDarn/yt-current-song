@@ -19,7 +19,12 @@ func getCurrentSongInfoRoute(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	currentSongInfo := yt.GetCurrentSongInfo(tokenQuery[0])
+	appIpQuery := req.URL.Query()["appIp"]
+	if len(appIpQuery) == 0 {
+		appIpQuery = []string{"127.0.0.1"}
+	}
+
+	currentSongInfo := yt.GetCurrentSongInfo(tokenQuery[0], appIpQuery[0])
 	w.Write([]byte(currentSongInfo))
 }
 

@@ -9,6 +9,7 @@ import (
 
 func main() {
 	authToken := flag.String("token", "", "API Token to connect to YT Desktop app")
+	appIp := flag.String("appIp", "127.0.0.1", "YT Desktop app ip address")
 	flag.Parse()
 
 	if *authToken == "" {
@@ -16,5 +17,5 @@ func main() {
 		return
 	}
 
-	fmt.Println(yt.GetCurrentSongInfo(*authToken))
+	fmt.Println(yt.GetCurrentSongInfo(*authToken, *appIp))
 }
