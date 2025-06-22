@@ -1,21 +1,12 @@
 package pkg
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
-	"strings"
 )
 
 const (
 	NoAuthTokenError = "Cannot access current song info without YT Desktop api token"
-	authHeader       = "authorization"
-
-	ytDesktopApiUrl      = "http://{ip}:9863/api/v1/"
-	ytDesktopGetStateUrl = ytDesktopApiUrl + "state"
 
 	ytVideoUrl                = "https://www.youtube.com/watch?v="
 	ytTimeParam               = "&t="
@@ -84,34 +75,10 @@ func (s ytVideoState) addVideoPlaylist(videoUrl *string) {
 }
 
 func GetCurrentSongInfo(authToken string, appIp string) string {
-	songState, err := getYtVideoState(authToken, appIp)
+	songState, err := GetYtVideoState(authToken, appIp)
 	if err != nil {
 		return err.Error()
 	}
 
 	return songState.getFormattedSongInfo()
-}
-
-func getYtVideoState(authToken string, appIp string) (ytVideoState, error) {
-	url := strings.Replace(ytDesktopGetStateUrl, "{ip}", appIp, 1)
-	req, err := http.NewRequest("GET", url, nil)
-	CheckError(err)
-
-	req.Header.Set(authHeader, authToken)
-
-	client := &http.Client{}
-	res, err := client.Do(req)
-	CheckError(err)
-
-	resBody, err := io.ReadAll(res.Body)
-	CheckError(err)
-
-	var videoState ytVideoState
-	json.Unmarshal(resBody, &videoState)
-
-	if videoState.Error != "" {
-		return videoState, errors.New(videoState.Error)
-	}
-
-	return videoState, nil
 }

@@ -1,6 +1,9 @@
 package pkg
 
 import (
+	"bytes"
+	"io"
+	"net/http"
 	"strconv"
 )
 
@@ -49,4 +52,26 @@ func addLeadingZero(number int) string {
 	}
 
 	return "0" + strNumber
+}
+
+func doRequest(method string, url string, body []byte, headers map[string]string) []byte {
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
+	CheckError(err)
+
+	if method == http.MethodPost {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	for name, value := range headers {
+		req.Header.Set(name, value)
+	}
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	CheckError(err)
+
+	resBody, err := io.ReadAll(res.Body)
+	CheckError(err)
+
+	return resBody
 }
